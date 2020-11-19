@@ -1,11 +1,7 @@
+import unittest
+
 import slice
 import stl_reader
-import unittest
-from matplotlib import pyplot
-import pylab
-from mpl_toolkits.mplot3d import Axes3D
-import random
-import numpy as np
 from util import printBigArray
 
 
@@ -42,7 +38,6 @@ class TestSlice(unittest.TestCase):
         self.assertEqual(slice.whereLineCrossesZ(p1, p2, 5), p2)
         self.assertEqual(slice.whereLineCrossesZ(p1, p2, 3), [1.5, 3, 3])
         self.assertEqual(slice.whereLineCrossesZ([0, 0, 0], [0, 1, 1], 0.5), [0.0, 0.5, 0.5])
-
 
     def test_linearInterpolation(self):
         p1 = [2, 4, 1]
@@ -101,7 +96,6 @@ class TestSlice(unittest.TestCase):
         ]
         lines = list(slice.triangleToIntersectingLines(tri, 3))
         self.assertTrue(tri in lines)
-
 
     def test_toVoxels(self):
         lines = [

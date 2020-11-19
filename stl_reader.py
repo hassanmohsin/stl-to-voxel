@@ -10,8 +10,9 @@ Returns Header,Points,Normals,Vertex1,Vertex2,Vertex3
 Source: http://sukhbinder.wordpress.com/2013/11/28/binary-stl-file-reader-in-python-powered-by-numpy/
 
 """
-import numpy as np
 from struct import unpack
+
+import numpy as np
 
 
 def BinarySTL(fname):
@@ -24,7 +25,7 @@ def BinarySTL(fname):
         ('Vertex1', np.float32, (3,)),
         ('Vertex2', np.float32, (3,)),
         ('Vertex3', np.float32, (3,)),
-        ('atttr', '<i2', (1,) )
+        ('atttr', '<i2', (1,))
     ])
     data = np.fromfile(fp, dtype=record_dtype, count=Numtri)
     fp.close()
@@ -35,10 +36,11 @@ def BinarySTL(fname):
     Vertex3 = data['Vertex3']
 
     p = np.append(Vertex1, Vertex2, axis=0)
-    p = np.append(p, Vertex3, axis=0)  #list(v1)
+    p = np.append(p, Vertex3, axis=0)  # list(v1)
     Points = np.array(list(set(tuple(p1) for p1 in p)))
 
     return Header, Points, Normals, Vertex1, Vertex2, Vertex3
+
 
 def AsciiSTL(fname):
     with open(fname, 'r') as input_data:
@@ -63,8 +65,9 @@ def AsciiSTL(fname):
 
     return triangles
 
+
 def IsAsciiStl(fname):
-    with open(fname,'rb') as input_data:
+    with open(fname, 'rb') as input_data:
         line = input_data.readline()
         if line[:5] == b'solid':
             return True
@@ -74,11 +77,9 @@ def IsAsciiStl(fname):
 
 def read_stl_verticies(fname):
     if IsAsciiStl(fname):
-        for (i,j,k) in AsciiSTL(fname):
-            yield (tuple(i),tuple(j),tuple(k))
+        for (i, j, k) in AsciiSTL(fname):
+            yield (tuple(i), tuple(j), tuple(k))
     else:
         head, p, n, v1, v2, v3 = BinarySTL(fname)
         for i, j, k in zip(v1, v2, v3):
             yield (tuple(i), tuple(j), tuple(k))
-
-
