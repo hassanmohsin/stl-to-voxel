@@ -15,6 +15,24 @@ from util import arrayToWhiteGreyscalePixel, padVoxelArray
 
 
 def doExport(inputFilePath, outputFilePath, resolution):
+    scale, shift, vol, bounding_box = get_voxels(inputFilePath, resolution)
+    outputFilePattern, outputFileExtension = os.path.splitext(outputFilePath)
+    if outputFileExtension == '.png':
+        exportPngs(vol, bounding_box, outputFilePath)
+    elif outputFileExtension == '.xyz':
+        exportXyz(vol, bounding_box, outputFilePath)
+    elif outputFileExtension == '.svx':
+        exportSvx(vol, bounding_box, outputFilePath, scale, shift)
+
+
+def get_voxels(inputFilePath, resolution):
+    """
+    Converts an .stl file into voxels
+    :param inputFilePath: Input .stl file
+    :param resolution: Resolution of the voxel cube
+    :return: scale, shift, volume and bounding box of the voxel cube
+    """
+
     mesh = list(stl_reader.read_stl_verticies(inputFilePath))
     (scale, shift, bounding_box) = slice.calculateScaleAndShift(mesh, resolution)
     mesh = list(slice.scaleAndShiftMesh(mesh, scale, shift))
@@ -26,14 +44,9 @@ def doExport(inputFilePath, outputFilePath, resolution):
         prepixel = np.zeros((bounding_box[0], bounding_box[1]), dtype=bool)
         perimeter.linesToVoxels(lines, prepixel)
         vol[height] = prepixel
+
     vol, bounding_box = padVoxelArray(vol)
-    outputFilePattern, outputFileExtension = os.path.splitext(outputFilePath)
-    if outputFileExtension == '.png':
-        exportPngs(vol, bounding_box, outputFilePath)
-    elif outputFileExtension == '.xyz':
-        exportXyz(vol, bounding_box, outputFilePath)
-    elif outputFileExtension == '.svx':
-        exportSvx(vol, bounding_box, outputFilePath, scale, shift)
+    return scale, shift, vol, bounding_box
 
 
 def exportPngs(voxels, bounding_box, outputFilePath):
