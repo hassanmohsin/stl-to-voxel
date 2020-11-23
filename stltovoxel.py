@@ -7,10 +7,10 @@ from zipfile import ZipFile
 
 import numpy as np
 from PIL import Image
+from stl import Mesh
 
 import perimeter
 import slice
-import stl_reader
 from util import arrayToWhiteGreyscalePixel, padVoxelArray
 
 
@@ -33,7 +33,8 @@ def get_voxels(inputFilePath, resolution):
     :return: scale, shift, volume and bounding box of the voxel cube
     """
 
-    mesh = list(stl_reader.read_stl_verticies(inputFilePath))
+    triangles = Mesh.from_file(inputFilePath)
+    mesh = triangles.data['vectors'].tolist()
     (scale, shift, bounding_box) = slice.calculateScaleAndShift(mesh, resolution)
     mesh = list(slice.scaleAndShiftMesh(mesh, scale, shift))
     # Note: vol should be addressed with vol[z][x][y]
