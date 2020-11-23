@@ -1,4 +1,5 @@
 import argparse
+import math
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,6 +19,15 @@ class ColorImage(object):
     def generate_voxels(self):
         _, _, self.voxels, self.bounding_box = get_voxels(self.mesh, resolution=self.voxel_resolution)
 
+    def rotate(self, axis, degree):
+        """
+        Rotate the mesh
+        :param axis: axis to rotate around; e.g., x-axis= [0.5, 0., 0.], y-axis = [0., 0.5, 0.
+        :param degree: degree of rotation
+        :return: None
+        """
+        self.mesh.rotate(axis, math.radians(degree))
+
     def get_color_image(self, axis='x', image_file='color_image.png', dpi=300):
         if not self.voxels:
             self.generate_voxels()
@@ -35,10 +45,16 @@ if __name__ == '__main__':
                         help="Input file (.stl)")
     parser.add_argument('--vres', type=int, default=100, action='store', help="Voxel resolution")
     parser.add_argument('--ires', type=int, default=300, action='store', help="Image resolution.")
-    parser.add_argument('--axis', type=str, default='z', action='store', help="Axis of x-ray")
+    parser.add_argument('--ray-axis', type=str, default='z', action='store', help="Axis of x-ray")
+    parser.add_argument('--rotation-axis', nargs='+', type=float, default=None, action='store', help="Rotation axis, e.g., 0.5 0.5 0 for rotating around x and y axes.")
+    parser.add_argument('--theta', type=float, default=None, action='store', help="Angle of rotation, e.g., 45")
     parser.add_argument('--output', nargs='?', type=lambda s: file_choices(('.png', '.jpg'), s),
                         help="Output file (.png, .jpg).")
     args = parser.parse_args()
 
     color_image = ColorImage(args.input, args.vres)
-    color_image.get_color_image(image_file=args.output, dpi=args.ires, axis=args.axis)
+    if args.rotation_axis:
+        if not args.theta:
+            raise ValueError("Please specify the rotation axis.")
+        color_image.rotate(args.rotation_axis, args.theta)
+    color_image.get_color_image(image_file=args.output, dpi=args.ires, axis=args.ray_axis)
