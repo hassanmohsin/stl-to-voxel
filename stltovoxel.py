@@ -14,8 +14,13 @@ import slice
 from util import arrayToWhiteGreyscalePixel, padVoxelArray
 
 
+def read_stl(input_file):
+    return Mesh.from_file(input_file)
+
+
 def doExport(inputFilePath, outputFilePath, resolution):
-    scale, shift, vol, bounding_box = get_voxels(inputFilePath, resolution)
+    triangles = read_stl(inputFilePath)
+    scale, shift, vol, bounding_box = get_voxels(triangles, resolution)
     outputFilePattern, outputFileExtension = os.path.splitext(outputFilePath)
     if outputFileExtension == '.png':
         exportPngs(vol, bounding_box, outputFilePath)
@@ -25,15 +30,13 @@ def doExport(inputFilePath, outputFilePath, resolution):
         exportSvx(vol, bounding_box, outputFilePath, scale, shift)
 
 
-def get_voxels(inputFilePath, resolution):
+def get_voxels(triangles, resolution):
     """
     Converts an .stl file into voxels
-    :param inputFilePath: Input .stl file
+    :param triangles: Mesh of the object
     :param resolution: Resolution of the voxel cube
     :return: scale, shift, volume and bounding box of the voxel cube
     """
-
-    triangles = Mesh.from_file(inputFilePath)
     mesh = triangles.data['vectors'].tolist()
     (scale, shift, bounding_box) = slice.calculateScaleAndShift(mesh, resolution)
     mesh = list(slice.scaleAndShiftMesh(mesh, scale, shift))
