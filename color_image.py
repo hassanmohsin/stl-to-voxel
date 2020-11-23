@@ -3,19 +3,20 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
-from stltovoxel import get_voxels, file_choices
+from stltovoxel import get_voxels, file_choices, read_stl
 
 
 class ColorImage(object):
     def __init__(self, stl_file, voxel_resolution=100):
         self.stl_file = stl_file
         self.voxel_resolution = voxel_resolution
+        self.mesh = read_stl(self.stl_file)
         self.voxels = None
         self.bounding_box = None
         self.image = None
 
     def generate_voxels(self):
-        _, _, self.voxels, self.bounding_box = get_voxels(self.stl_file, resolution=self.voxel_resolution)
+        _, _, self.voxels, self.bounding_box = get_voxels(self.mesh, resolution=self.voxel_resolution)
 
     def get_color_image(self, axis='x', image_file='color_image.png', dpi=300):
         if not self.voxels:
@@ -34,7 +35,7 @@ if __name__ == '__main__':
                         help="Input file (.stl)")
     parser.add_argument('--vres', type=int, default=100, action='store', help="Voxel resolution")
     parser.add_argument('--ires', type=int, default=300, action='store', help="Image resolution.")
-    parser.add_argument('--axis', type=str, default='x', action='store', help="Axis of x-ray")
+    parser.add_argument('--axis', type=str, default='z', action='store', help="Axis of x-ray")
     parser.add_argument('--output', nargs='?', type=lambda s: file_choices(('.png', '.jpg'), s),
                         help="Output file (.png, .jpg).")
     args = parser.parse_args()
