@@ -39,7 +39,7 @@ def get_voxels(inputFilePath, resolution):
     # Note: vol should be addressed with vol[z][x][y]
     vol = np.zeros((bounding_box[2], bounding_box[0], bounding_box[1]), dtype=bool)
     for height in range(bounding_box[2]):
-        print('Processing layer %d/%d' % (height + 1, bounding_box[2]))
+        # print('Processing layer %d/%d' % (height + 1, bounding_box[2]))
         lines = slice.toIntersectingLines(mesh, height)
         prepixel = np.zeros((bounding_box[0], bounding_box[1]), dtype=bool)
         perimeter.linesToVoxels(lines, prepixel)
