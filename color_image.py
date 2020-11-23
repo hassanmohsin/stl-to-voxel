@@ -34,9 +34,10 @@ if __name__ == '__main__':
                         help="Input file (.stl)")
     parser.add_argument('--vres', type=int, default=100, action='store', help="Voxel resolution")
     parser.add_argument('--ires', type=int, default=300, action='store', help="Image resolution.")
+    parser.add_argument('--axis', type=str, default='x', action='store', help="Axis of x-ray")
     parser.add_argument('--output', nargs='?', type=lambda s: file_choices(('.png', '.jpg'), s),
                         help="Output file (.png, .jpg).")
     args = parser.parse_args()
 
     color_image = ColorImage(args.input, args.vres)
-    color_image.get_color_image(image_file=args.output, dpi=args.ires)
+    color_image.get_color_image(image_file=args.output, dpi=args.ires, axis=args.axis)
