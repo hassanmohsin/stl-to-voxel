@@ -41,12 +41,13 @@ class ColorImage(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert STL files to false colored 2D image')
-    parser.add_argument('--input', nargs='?', type=lambda s: file_choices(('.stl'), s),
+    parser.add_argument('--input', nargs='?', type=lambda s: file_choices('.stl', s),
                         help="Input file (.stl)")
     parser.add_argument('--vres', type=int, default=100, action='store', help="Voxel resolution")
     parser.add_argument('--ires', type=int, default=300, action='store', help="Image resolution.")
     parser.add_argument('--ray-axis', type=str, default='z', action='store', help="Axis of x-ray")
-    parser.add_argument('--rotation-axis', nargs='+', type=float, default=None, action='store', help="Rotation axis, e.g., 0.5 0.5 0 for rotating around x and y axes.")
+    parser.add_argument('--rotation-axis', nargs='+', type=float, default=None, action='store',
+                        help="Rotation axis, e.g., 0.5 0.5 0 for rotating around x and y axes.")
     parser.add_argument('--theta', type=float, default=None, action='store', help="Angle of rotation, e.g., 45")
     parser.add_argument('--output', nargs='?', type=lambda s: file_choices(('.png', '.jpg'), s),
                         help="Output file (.png, .jpg).")
