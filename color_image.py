@@ -14,6 +14,7 @@ class ColorImage(object):
         self.mesh = read_stl(self.stl_file)
         self.voxels = None
         self.bounding_box = None
+        self.image_data = None
         self.image = None
 
     def generate_voxels(self):
@@ -33,10 +34,13 @@ class ColorImage(object):
             self.generate_voxels()
 
         axes = {'x': 0, 'y': 1, 'z': 2}
-        self.image = np.sum(self.voxels, axis=axes[axis])
-        plt.figure(figsize=(50, 50))
-        plt.matshow(self.image, cmap=plt.cm.viridis)
-        plt.savefig(image_file, dpi=dpi)
+        self.image_data = np.sum(self.voxels, axis=axes[axis])
+
+        # Generate the image
+        self.image = plt.imshow(self.image_data)
+        self.image.set_cmap('viridis')
+        plt.axis('off')
+        plt.savefig(image_file, dpi=dpi, bbox_inches='tight', pad_inches=0)
 
 
 if __name__ == '__main__':
