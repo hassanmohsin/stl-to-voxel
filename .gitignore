@@ -1,2 +1,5 @@
 .idea/
 *.xyz
+*.stl
+.ipynb_checkpoints/
+__pycache__/
