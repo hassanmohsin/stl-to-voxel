@@ -1,9 +1,8 @@
 import argparse
+import json
 import math
-
 import matplotlib.pyplot as plt
 import numpy as np
-
 from stltovoxel import get_voxels, file_choices, read_stl
 
 
@@ -12,10 +11,11 @@ class ColorImage(object):
         self.stl_file = stl_file
         self.voxel_resolution = voxel_resolution
         self.mesh = read_stl(self.stl_file)
-        self.voxels = None
-        self.bounding_box = None
+        self.scale, self.shift, self.voxels, self.bounding_box = None, None, None, None
         self.image_data = None
         self.image = None
+        self.xray_intensity = 10
+        self.materials_constant = 0.99
 
     def generate_voxels(self):
         _, _, self.voxels, self.bounding_box = get_voxels(self.mesh, resolution=self.voxel_resolution)
@@ -34,8 +34,12 @@ class ColorImage(object):
             self.generate_voxels()
 
         axes = {'x': 0, 'y': 1, 'z': 2}
-        self.image_data = np.sum(self.voxels, axis=axes[axis])
+        # Object volume traversed by the x-ray
+        xray_volume = np.sum(self.voxels, axis=axes[axis])
 
+        # Calculate absorption
+        self.image_data = self.xray_intensity * np.exp(-1 * self.materials_constant * xray_volume)
+        # self.image_data = self.image_data - self.config['xray_intensity']
         # Generate the image
         self.image = plt.imshow(self.image_data)
         self.image.set_cmap('viridis')
@@ -45,8 +49,7 @@ class ColorImage(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert STL files to false colored 2D image')
-    parser.add_argument('--input', nargs='?', type=lambda s: file_choices('.stl', s),
-                        help="Input file (.stl)")
+    parser.add_argument('--input', nargs='?', type=lambda s: file_choices('.stl', s), help="Input file (.stl)")
     parser.add_argument('--vres', type=int, default=100, action='store', help="Voxel resolution")
     parser.add_argument('--ires', type=int, default=300, action='store', help="Image resolution.")
     parser.add_argument('--ray-axis', type=str, default='z', action='store', help="Axis of x-ray")
