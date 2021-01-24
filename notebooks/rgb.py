@@ -1,3 +1,4 @@
+import os
 import sys
 import warnings
 
@@ -14,7 +15,7 @@ def get_voxels(stl_file, voxel_resolution=300, rotation=180):
     ci = ColorImage(stl_file, voxel_resolution=voxel_resolution)
     ci.rotate([0.5, 0, 0], rotation)
     ci.generate_voxels()
-    return ci.voxels
+    return ci.voxels.astype(np.float32)
 
 
 def plot_data(data, cmap='GnBu'):
@@ -72,10 +73,14 @@ if __name__ == '__main__':
     stl_file = sys.argv[1]
     output_file = sys.argv[2]
     print("Reading stl file and creating voxels...")
-    voxels = get_voxels(stl_file)
+    voxel_file = os.path.splitext(stl_file)[0]
+    if not os.path.isfile(voxel_file + ".npy"):
+        stack = get_voxels(stl_file)
+        np.save(voxel_file, stack)
+    else:
+        stack = np.load(voxel_file + ".npy")
 
     # Get the layers for each object
-    stack = voxels.astype(np.float32)
     first, second = get_layers(stack)
     stack_handgun = stack[..., :first]
     stack_knife = stack[..., first:second]
