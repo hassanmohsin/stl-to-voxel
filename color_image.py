@@ -1,12 +1,13 @@
 import argparse
-import json
 import math
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 from stltovoxel import get_voxels, file_choices, read_stl
 
 
-class ColorImage(object):
+class ColorImage (object):
     def __init__(self, stl_file, voxel_resolution=100):
         self.stl_file = stl_file
         self.voxel_resolution = voxel_resolution
@@ -29,22 +30,20 @@ class ColorImage(object):
         """
         self.mesh.rotate(axis, math.radians(degree))
 
-    def get_color_image(self, axis='x', image_file='color_image.png', dpi=300):
-        if not self.voxels:
-            self.generate_voxels()
-
-        axes = {'x': 0, 'y': 1, 'z': 2}
-        # Object volume traversed by the x-ray
-        xray_volume = np.sum(self.voxels, axis=axes[axis])
-
-        # Calculate absorption
-        self.image_data = self.xray_intensity * np.exp(-1 * self.materials_constant * xray_volume)
-        # self.image_data = self.image_data - self.config['xray_intensity']
-        # Generate the image
-        self.image = plt.imshow(self.image_data)
-        self.image.set_cmap('viridis')
-        plt.axis('off')
-        plt.savefig(image_file, dpi=dpi, bbox_inches='tight', pad_inches=0)
+    def get_voxels(self, rotation_axis=None, degree=None):
+        """
+        Rotate and generate voxels
+        :param rotation_axis: Axis of rotation. Default is 180 degree radian rotation around [0.5, 0, 0] axis
+        :param degree: Degree of rotation
+        :return: Voxelized structure (numpy array)
+        """
+        if rotation_axis and degree:
+            assert isinstance(rotation_axis, list)
+            self.rotate(rotation_axis, degree)
+        else:
+            self.rotate([0.5, 0., 0.], 180)
+        self.generate_voxels()
+        return self.voxels
 
 
 if __name__ == '__main__':
