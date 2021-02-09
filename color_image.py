@@ -1,13 +1,10 @@
 import argparse
 import math
 
-import matplotlib.pyplot as plt
-import numpy as np
-
 from stltovoxel import get_voxels, file_choices, read_stl
 
 
-class ColorImage (object):
+class ColorImage(object):
     def __init__(self, stl_file, voxel_resolution=100):
         self.stl_file = stl_file
         self.voxel_resolution = voxel_resolution
@@ -40,8 +37,7 @@ class ColorImage (object):
         if rotation_axis and degree:
             assert isinstance(rotation_axis, list)
             self.rotate(rotation_axis, degree)
-        else:
-            self.rotate([0.5, 0., 0.], 180)
+
         self.generate_voxels()
         return self.voxels
 
@@ -55,13 +51,8 @@ if __name__ == '__main__':
     parser.add_argument('--rotation-axis', nargs='+', type=float, default=None, action='store',
                         help="Rotation axis, e.g., 0.5 0.5 0 for rotating around x and y axes.")
     parser.add_argument('--theta', type=float, default=None, action='store', help="Angle of rotation, e.g., 45")
-    parser.add_argument('--output', nargs='?', type=lambda s: file_choices(('.png', '.jpg'), s),
-                        help="Output file (.png, .jpg).")
     args = parser.parse_args()
 
     color_image = ColorImage(args.input, args.vres)
-    if args.rotation_axis:
-        if not args.theta:
-            raise ValueError("Please specify the rotation axis.")
-        color_image.rotate(args.rotation_axis, args.theta)
-    color_image.get_color_image(image_file=args.output, dpi=args.ires, axis=args.ray_axis)
+    voxels = color_image.get_voxels()
+    print(f"Voxels shape: {voxels.shape}")
