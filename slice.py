@@ -96,18 +96,16 @@ def whereLineCrossesZ(p1, p2, z):
 
 
 def calculateScaleAndShift(mesh, resolution):
-    allPoints = [item for sublist in mesh for item in sublist]
-    mins = [0, 0, 0]
-    maxs = [0, 0, 0]
-    for i in range(3):
-        mins[i] = min(allPoints, key=lambda tri: tri[i])[i]
-        maxs[i] = max(allPoints, key=lambda tri: tri[i])[i]
-    shift = [-min for min in mins]
+    allpoints = mesh.reshape(-1, 3)
+    mins = allpoints.min(axis=0)
+    maxs = allpoints.max(axis=0)
+    del allpoints
+    shift = -1 * mins
     xyscale = float(resolution - 1) / (max(maxs[0] - mins[0], maxs[1] - mins[1]))
     # TODO: Change this to return one scale. If not, verify svx exporting still works.
     scale = [xyscale, xyscale, xyscale]
     bounding_box = [resolution, resolution, math.ceil((maxs[2] - mins[2]) * xyscale)]
-    return (scale, shift, bounding_box)
+    return scale, shift, bounding_box
 
 
 def scaleAndShiftMesh(mesh, scale, shift):
