@@ -1,11 +1,25 @@
 import math
 
+import numpy as np
+
 from util import manhattanDistance, removeDupsFromPointList
 
 
 def toIntersectingLines(mesh, height):
-    relevantTriangles = list(filter(lambda tri: isAboveAndBelow(tri, height), mesh))
-    notSameTriangles = filter(lambda tri: not isIntersectingTriangle(tri, height), relevantTriangles)
+    # find relevant triangles
+    mask = np.zeros(len(mesh))
+    z_val = mesh[:, 2::3]
+    above = z_val > height
+    below = z_val < height
+    same = z_val == height
+    row_sum = same.sum(axis=1)
+    mask[row_sum == 3] = 1
+    mask[row_sum == 2] = 1
+    mask[np.any(above, axis=1) & np.any(below, axis=1)] = 1
+    # find intersecting triangles
+    not_same_triangle = ~np.all(same, axis=1)
+    notSameTriangles = mesh[mask.astype(np.bool) & not_same_triangle].reshape(-1, 3, 3)
+    # TODO: Make the following line faster
     lines = list(map(lambda tri: triangleToIntersectingLines(tri, height), notSameTriangles))
     return lines
 
