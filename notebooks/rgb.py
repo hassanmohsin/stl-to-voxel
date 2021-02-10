@@ -42,10 +42,11 @@ def get_layers(stack):
 
 
 def get_xray_image(objects, energy=1e5):
+    # List of materials in xraydb: https://github.com/xraypy/XrayDB/blob/master/python/xraydb/materials.dat
     thickness_factor = 10
     m1 = material_mu('Fe', energy)
     m2 = material_mu('Al', energy)
-    m3 = material_mu('quartz', energy)
+    m3 = material_mu('polypropylene', energy)
     object_layers = [ob.sum(axis=2) for ob in objects]
     l0 = np.ones_like(object_layers[0], dtype=np.float32)
     exp_factor = m1 * object_layers[0] + m2 * object_layers[1] + m3 * object_layers[2]
@@ -75,7 +76,7 @@ if __name__ == '__main__':
     print("Reading stl file and creating voxels...")
     voxel_file = os.path.splitext(stl_file)[0]
     if not os.path.isfile(voxel_file + ".npy"):
-        stack = get_voxels(stl_file)
+        stack = get_voxels(stl_file, voxel_resolution=1000)
         np.save(voxel_file, stack)
     else:
         stack = np.load(voxel_file + ".npy")
@@ -90,15 +91,17 @@ if __name__ == '__main__':
     print("Calculating xray absorptions...")
     le = get_xray_image(objects, energy=1e3)
     me = get_xray_image(objects, energy=3e5)
-    he = get_xray_image(objects, energy=6e5)
+    he = get_xray_image(objects, energy=2e5)
 
     print("Generating false colors...")
     # Calculate the Q-values
     q_values = np.log10(he, le)
     q_values = 1. - q_values
 
+    # This clipping is flawed. It will always generate the same color irrespective of xray energies.
     q_values_clipped = np.interp(q_values, np.linspace(q_values.min(), q_values.max(), 100),
                                  np.linspace(0.02, 0.91, 100))
+    # q_values_clipped = q_values
     hsv = np.zeros((q_values.shape + (3,)))
     hsv[..., 0] = q_values_clipped
     hsv[..., 1] = 1.
@@ -109,5 +112,6 @@ if __name__ == '__main__':
     print("Saving the false color image...")
     fig = plt.figure(figsize=(20, 15))
     plt.axis('off')
+    plt.tight_layout()
     plt.imshow(colors.hsv_to_rgb(hsv))
     plt.savefig(output_file, dpi=300)
