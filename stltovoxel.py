@@ -39,20 +39,14 @@ def get_voxels(triangles, resolution):
     """
     mesh = triangles.data['vectors'].astype(np.float32)
     (scale, shift, bounding_box) = slice.calculateScaleAndShift(mesh, resolution)
-    # mesh = list(slice.scaleAndShiftMesh(mesh, scale, shift))
     new_points = (mesh.reshape(-1, 3) + shift) * scale
-    # TODO: Remove duplicate triangles from the following mesh
-    mesh = new_points.reshape(-1, 3, 3)
-    # mesh = np.unique(new_points.reshape(-1, 3, 3), axis=0)
+    # TODO: Remove duplicate triangles from new_points
     # Note: vol should be addressed with vol[z][x][y]
     vol = np.zeros((bounding_box[2], bounding_box[0], bounding_box[1]), dtype=bool)
     for height in range(bounding_box[2]):
-        # print('Processing layer %d/%d' % (height + 1, bounding_box[2]))
         # find the lines that intersect triangles at height 0 -> z
-        lines = slice.toIntersectingLines(mesh, height)
-        prepixel = np.zeros((bounding_box[0], bounding_box[1]), dtype=bool)
-        perimeter.linesToVoxels(lines, prepixel)
-        vol[height] = prepixel
+        lines = slice.toIntersectingLines(new_points.reshape(-1, 9), height)
+        perimeter.linesToVoxels(lines, vol[height])
 
     vol, bounding_box = padVoxelArray(vol)
     return scale, shift, vol, bounding_box
