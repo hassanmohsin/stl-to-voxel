@@ -1,7 +1,7 @@
 def linesToVoxels(lineList, pixels):
     for x in range(len(pixels)):
         isBlack = False
-        # Choose the lines that are (above and below) or (same level and above) the z-plane
+        # Choose the lines where x lies
         lines = list(findRelevantLines(lineList, x))
         if not isBlack and not lines:
             continue
