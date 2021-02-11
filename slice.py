@@ -17,8 +17,7 @@ def toIntersectingLines(mesh, height):
     mask[row_sum == 2] = 1
     mask[np.any(above, axis=1) & np.any(below, axis=1)] = 1
     # find intersecting triangles
-    not_same_triangle = ~np.all(same, axis=1)
-    notSameTriangles = mesh[mask.astype(np.bool) & not_same_triangle].reshape(-1, 3, 3)
+    notSameTriangles = mesh[mask.astype(np.bool) & ~np.all(same, axis=1)].reshape(-1, 3, 3)
     # TODO: Make the following line faster
     lines = list(map(lambda tri: triangleToIntersectingLines(tri, height), notSameTriangles))
     return lines
@@ -51,35 +50,11 @@ def linearInterpolation(p1, p2, distance):
     )
 
 
-def isAboveAndBelow(pointList, height):
-    '''
-
-    :param pointList: Can be line or triangle
-    :param height:
-    :return: true if any line from the triangle crosses or is on the height line,
-    '''
-    above = list(filter(lambda pt: pt[2] > height, pointList))
-    below = list(filter(lambda pt: pt[2] < height, pointList))
-    same = list(filter(lambda pt: pt[2] == height, pointList))
-    if len(same) == 3 or len(same) == 2:
-        return True
-    elif (above and below):
-        return True
-    else:
-        return False
-
-
-def isIntersectingTriangle(triangle, height):
-    assert (len(triangle) == 3)
-    same = list(filter(lambda pt: pt[2] == height, triangle))
-    return len(same) == 3
-
-
 def triangleToIntersectingLines(triangle, height):
     assert (len(triangle) == 3)
-    above = list(filter(lambda pt: pt[2] > height, triangle))
-    below = list(filter(lambda pt: pt[2] < height, triangle))
-    same = list(filter(lambda pt: pt[2] == height, triangle))
+    above = triangle[triangle[:, 2] > height]
+    below = triangle[triangle[:, 2] < height]
+    same = triangle[triangle[:, 2] == height]
     assert len(same) != 3
     if len(same) == 2:
         return same[0], same[1]
